@@ -11,11 +11,13 @@ export default function ScheduleTimeline({
   jobs,
   startMin = 0,
   endMin = 360,
+  onJobClick,
 }: {
   crews: Crew[];
   jobs: MaintenanceRequest[];
   startMin?: number;
   endMin?: number;
+  onJobClick?: (job: MaintenanceRequest) => void;
 }) {
   const span = endMin - startMin;
   const hours = Array.from({ length: span / 60 + 1 }, (_, i) => startMin + i * 60);
@@ -77,7 +79,8 @@ export default function ScheduleTimeline({
                       <div
                         key={job.id}
                         title={`#${job.id} ${job.title} · ${isoToTime(job.scheduled_start!)}–${isoToTime(job.scheduled_end!)} · ${job.location}`}
-                        className="group absolute inset-y-3 flex cursor-default items-center rounded-full transition-transform hover:z-10 hover:scale-y-110"
+                        onClick={() => onJobClick?.(job)}
+                        className={`group absolute inset-y-3 flex items-center rounded-full transition-transform hover:z-10 hover:scale-y-110 ${onJobClick ? "cursor-pointer" : "cursor-default"}`}
                         style={{
                           left: `${pct(s)}%`,
                           width: `${Math.max(pct(e) - pct(s), 1.5)}%`,

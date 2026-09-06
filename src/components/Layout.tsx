@@ -8,6 +8,7 @@ const NAV = [
   { to: "/app/requests", label: "Requests", color: "#005EC4", end: true },
   { to: "/app/schedule", label: "Schedule", color: "#009645", end: false },
   { to: "/app/whatif", label: "What-If", color: "#FA9E0D", end: false },
+  { to: "/app/resources", label: "Resources", color: "#0099AA", end: true },
 ];
 
 export default function Layout() {

@@ -5,6 +5,7 @@ import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import RequestIntake from "./pages/RequestIntake";
 import RequestsList from "./pages/RequestsList";
+import Resources from "./pages/Resources";
 import ScheduleViewer from "./pages/ScheduleViewer";
 import WhatIf from "./pages/WhatIf";
 
@@ -19,6 +20,7 @@ export default function App() {
         <Route path="/app/requests/new" element={<RequestIntake />} />
         <Route path="/app/schedule" element={<ScheduleViewer />} />
         <Route path="/app/whatif" element={<WhatIf />} />
+        <Route path="/app/resources" element={<Resources />} />
       </Route>
     </Routes>
   );

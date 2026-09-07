@@ -1,4 +1,4 @@
-# Cascade
+<img width="1213" height="492" alt="image" src="https://github.com/user-attachments/assets/0007c164-cf49-44af-99b6-26e7c181f50c" />
 
 Cascade is a rail maintenance scheduling optimisation prototype built around the CAPO framework:
 

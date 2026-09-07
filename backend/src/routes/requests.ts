@@ -1,19 +1,21 @@
 import { Router } from "express";
 import { getRequests, getRequestById, insertRequest, updateRequest, getCrews } from "../db/queries";
 import { computeTrustScore, computeFinalPriority } from "../services/prioritise";
-import type { ConflictSuggestion, NewRequestInput } from "../types";
+import type { ConflictSuggestion } from "../types";
+import { conflictSuggestionSchema, idParamSchema, newRequestSchema, parseInput, requestsQuerySchema } from "../validation";
 
 const router = Router();
 
 router.get("/", (req, res) => {
-  const status = req.query.status as string | undefined;
-  const valid = ["pending", "scheduled", "deferred", "in_conflict"];
-  const requests = getRequests(valid.includes(status ?? "") ? (status as any) : undefined);
-  res.json(requests);
+  const query = parseInput(requestsQuerySchema, req.query, res);
+  if (!query) return;
+  res.json(getRequests(query.status));
 });
 
 router.post("/", (req, res) => {
-  const input: NewRequestInput = req.body;
+  const input = parseInput(newRequestSchema, req.body, res);
+  if (!input) return;
+
   const trust = computeTrustScore(input.title, input.type);
   const final = computeFinalPriority(input.priority_score, trust);
 
@@ -32,8 +34,10 @@ router.post("/", (req, res) => {
 });
 
 router.get("/:id/suggestions", (req, res) => {
-  const id = Number(req.params.id);
-  const req_ = getRequestById(id);
+  const params = parseInput(idParamSchema, req.params, res);
+  if (!params) return;
+
+  const req_ = getRequestById(params.id);
   if (!req_) return res.status(404).json({ error: "Not found" });
 
   const scheduled = getRequests("scheduled");
@@ -102,15 +106,18 @@ router.get("/:id/suggestions", (req, res) => {
 });
 
 router.post("/:id/apply-suggestion", (req, res) => {
-  const id = Number(req.params.id);
-  const req_ = getRequestById(id);
+  const params = parseInput(idParamSchema, req.params, res);
+  if (!params) return;
+  const suggestion = parseInput(conflictSuggestionSchema, req.body, res);
+  if (!suggestion) return;
+
+  const req_ = getRequestById(params.id);
   if (!req_) return res.status(404).json({ error: "Not found" });
 
-  const suggestion: ConflictSuggestion = req.body;
   const SCHEDULE_DATE = "2026-09-01";
 
   if (suggestion.type === "defer") {
-    updateRequest(id, { status: "deferred", conflict_reason: null });
+    updateRequest(params.id, { status: "deferred", conflict_reason: null });
   } else {
     const fields: Partial<typeof req_> = { status: "scheduled", conflict_reason: null };
     if (suggestion.type === "change_time") {
@@ -128,7 +135,7 @@ router.post("/:id/apply-suggestion", (req, res) => {
       fields.scheduled_end = `${SCHEDULE_DATE}T03:00:00`;
       fields.assigned_crew_id = 2;
     }
-    updateRequest(id, fields);
+    updateRequest(params.id, fields);
   }
 
   res.json({ ok: true });

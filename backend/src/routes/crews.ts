@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { getCrews, getCrewById, insertCrew, updateCrew, deleteCrew } from "../db/queries";
+import { crewPatchSchema, crewSchema, idParamSchema, parseInput } from "../validation";
 
 const router = Router();
 
@@ -8,22 +9,27 @@ router.get("/", (_req, res) => {
 });
 
 router.post("/", (req, res) => {
-  const { name, skills, available_start, available_end, max_concurrent_jobs } = req.body;
-  const crew = insertCrew({ name, skills, available_start, available_end, max_concurrent_jobs });
+  const input = parseInput(crewSchema, req.body, res);
+  if (!input) return;
+  const crew = insertCrew(input);
   res.status(201).json(crew);
 });
 
 router.patch("/:id", (req, res) => {
-  const id = Number(req.params.id);
-  if (!getCrewById(id)) return res.status(404).json({ error: "Not found" });
-  const updated = updateCrew(id, req.body);
+  const params = parseInput(idParamSchema, req.params, res);
+  if (!params) return;
+  const input = parseInput(crewPatchSchema, req.body, res);
+  if (!input) return;
+  if (!getCrewById(params.id)) return res.status(404).json({ error: "Not found" });
+  const updated = updateCrew(params.id, input);
   res.json(updated);
 });
 
 router.delete("/:id", (req, res) => {
-  const id = Number(req.params.id);
-  if (!getCrewById(id)) return res.status(404).json({ error: "Not found" });
-  deleteCrew(id);
+  const params = parseInput(idParamSchema, req.params, res);
+  if (!params) return;
+  if (!getCrewById(params.id)) return res.status(404).json({ error: "Not found" });
+  deleteCrew(params.id);
   res.status(204).send();
 });
 

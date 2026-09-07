@@ -195,6 +195,38 @@ export default function Landing() {
         </div>
       </section>
 
+      {/* backend flow */}
+      <section className="border-y border-ink/10 bg-white/70">
+        <div className="mx-auto max-w-6xl px-6 py-16">
+          <div className="grid gap-8 lg:grid-cols-[0.8fr_1.2fr]">
+            <div>
+              <p className="font-mono text-[11px] font-semibold uppercase tracking-[0.3em] text-ink/50">How the backend works</p>
+              <h2 className="mt-4 text-4xl font-black tracking-tight">A real API, not just mock screens.</h2>
+              <p className="mt-4 text-sm leading-relaxed text-ink/60">
+                The React app talks to an Express backend through Vite's <span className="font-mono">/api</span> proxy.
+                The backend stores requests, crews, equipment and sectors in SQLite, then runs the CAPO scheduling
+                services whenever the duty manager optimises the night.
+              </p>
+            </div>
+
+            <div className="grid gap-3 sm:grid-cols-2">
+              {[
+                { step: "01", title: "Capture", body: "POST /api/requests and the Resources page write maintenance demand, crews, equipment and sectors into SQLite." },
+                { step: "02", title: "Assess", body: "The conflict engine checks time overlaps, sector exclusions, crew capacity, equipment contention and work compatibility." },
+                { step: "03", title: "Prioritise", body: "Each request gets a trust score and final priority using 0.6 × urgency + 0.4 × confidence." },
+                { step: "04", title: "Optimise", body: "POST /api/optimise runs the scheduler, persists the result, and returns schedule, conflicts, deferrals and bottlenecks." },
+              ].map((item) => (
+                <div key={item.step} className="rounded-2xl border border-ink/10 bg-paper p-5 shadow-[0_1px_2px_rgba(0,0,0,0.04)]">
+                  <span className="font-mono text-xs font-semibold text-ink/30">{item.step}</span>
+                  <h3 className="mt-3 text-base font-bold tracking-tight">{item.title}</h3>
+                  <p className="mt-2 text-sm leading-relaxed text-ink/60">{item.body}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
       <TrackDivider color="#111111" stations={5} animated className="mx-auto max-w-6xl px-6 opacity-30" />
 
       {/* features — horizontal rail driven by vertical scroll */}

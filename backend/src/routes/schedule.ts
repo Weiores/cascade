@@ -1,11 +1,13 @@
 import { Router } from "express";
-import { getRequests, getLastRun } from "../db/queries";
-import { getCrews } from "../db/queries";
+import { getRequests, getLastRun, getCrews } from "../db/queries";
+import { parseInput, scheduleQuerySchema } from "../validation";
 
 const router = Router();
 
 router.get("/", (req, res) => {
-  const date = (req.query.date as string) || "2026-09-01";
+  const query = parseInput(scheduleQuerySchema, req.query, res);
+  if (!query) return;
+  const date = query.date || "2026-09-01";
   const requests = getRequests();
   const lastRun = getLastRun(date);
 

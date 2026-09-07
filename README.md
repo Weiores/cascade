@@ -1,32 +1,111 @@
-# React + TypeScript + Vite
+# Cascade
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+Cascade is a rail maintenance scheduling optimisation prototype built around the CAPO framework:
 
-Currently, two official plugins are available:
+- **Capture** maintenance demand and available resources
+- **Assess** time, space, resource, and safety constraints
+- **Prioritise** work by urgency, trust, and operational value
+- **Optimise** the nightly schedule against limited engineering hours and manpower
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+The app helps a duty manager turn competing maintenance requests into a conflict-aware nightly plan, understand why work was moved or deferred, and test whether adding resources would improve output.
 
-## React Compiler
+## Features
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- Maintenance request intake with trust and priority scoring
+- Constraint and conflict detection across sectors, crews, equipment, and work compatibility
+- Priority-weighted schedule optimisation for overnight engineering windows
+- Interactive Gantt-style crew schedule
+- Conflict warnings with suggested alternatives
+- Resource management for crews, equipment, and sectors
+- What-if simulator for extra crews, equipment, or engineering time
+- Dashboard KPIs and bottleneck analysis
 
-## Expanding the Oxlint configuration
+## Architecture
 
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
-
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
+```text
+React + Vite frontend
+        |
+        | /api proxy
+        v
+Express backend (Node.js)
+        |
+        v
+SQLite local database
 ```
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+- Frontend: React 19, TypeScript, Vite, React Router, TanStack Query, Recharts, Tailwind CSS
+- Backend: Express, TypeScript, built-in Node.js SQLite (`node:sqlite`)
+- Database: generated locally in `backend/capo.db` and seeded automatically on first run
+
+## Requirements
+
+- Node.js 24+
+- npm
+
+## Setup
+
+Install dependencies for both apps:
+
+```bash
+npm install
+cd backend && npm install && cd ..
+```
+
+Start frontend and backend together:
+
+```bash
+npm run dev:all
+```
+
+Open:
+
+- Frontend: `http://localhost:5173`
+- Backend API: `http://localhost:3001/api`
+
+If port `3001` is already in use, stop the old backend process and run `npm run dev:all` again.
+
+## Scripts
+
+Root project:
+
+```bash
+npm run dev       # start Vite frontend only
+npm run dev:all   # start backend + frontend together
+npm run build     # type-check and build frontend
+npm run lint      # run oxlint
+npm run preview   # preview frontend build
+```
+
+Backend:
+
+```bash
+cd backend
+npm run dev       # start backend in watch mode
+npm run build     # compile backend TypeScript
+npm start         # run compiled backend
+```
+
+## Database
+
+Cascade uses a local SQLite database file under `backend/`. Runtime database files are intentionally ignored by git:
+
+```text
+backend/*.db*
+```
+
+A fresh database is created and seeded automatically from `backend/src/db/seed.ts` when the backend starts and no requests exist.
+
+## Main API areas
+
+- `GET /api/requests` — list maintenance requests
+- `POST /api/requests` — create a request
+- `POST /api/optimise` — run scheduling optimisation
+- `GET /api/schedule` — retrieve the current schedule
+- `POST /api/what-if` — simulate added resources or time
+- `GET /api/crews` — list crews
+- `GET /api/equipment` — list equipment
+- `GET /api/sectors` — list sectors
+
+## Notes
+
+This is a hackathon/MVP prototype. It is designed for local demonstration rather than production deployment.
